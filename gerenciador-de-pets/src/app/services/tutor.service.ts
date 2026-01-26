@@ -5,6 +5,7 @@ import { environment } from '../environments/environment';
 import { TutorRequest } from '../models/tutor-request.model';
 import { TutorResponse } from '../models/tutor-response.model';
 import { PagedResponse } from '../models/paged-response.model';
+import { Foto } from '../models/foto.model';
 
 
 @Injectable({
