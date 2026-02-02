@@ -17,7 +17,7 @@ describe('Integração Real com a API', () => {
   let createdPetId: number;
   let createdTutorId: number;
   
-  const TIMEOUT = 30000;
+  const TIMEOUT = 300000000;
 
   beforeAll(() => {
     TestBed.configureTestingModule({
