@@ -10,7 +10,7 @@
     "test:integration": "ng test --include='src/**/*.integration.spec.ts'"
   },
   "prettier": {
-    "printWidth": 100,
+    "printWidth": 200,
     "singleQuote": true,
     "overrides": [
       {
