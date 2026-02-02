@@ -24,16 +24,17 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && accessToken) {
-        return authService.refreshToken().pipe(
-          switchMap((newTokens) => {
-            return next(addTokenHeader(req, newTokens.access_token));
-          }),
-          catchError((refreshError) => {
-            authService.logout();
-            return throwError(() => refreshError);
-          })
-        );
+      if (error.status === 401) {
+        const refreshToken = authService.getRefreshToken();
+        if (refreshToken) {
+          return authService.refreshToken().pipe(
+            switchMap((newTokens) => next(addTokenHeader(req, newTokens.access_token))),
+            catchError((refreshError) => {
+              authService.logout();
+              return throwError(() => refreshError);
+            })
+          );
+        }
       }
 
       return throwError(() => error);
