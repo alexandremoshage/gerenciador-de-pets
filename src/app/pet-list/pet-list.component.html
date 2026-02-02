@@ -1,0 +1,36 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-2xl font-semibold">Pets</h1>
+    <button (click)="create()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Cadastrar Pet</button>
+  </div>
+
+  <div *ngIf="loading" class="text-center py-8">Carregando...</div>
+
+  <div *ngIf="!loading && pets.length === 0" class="text-center py-8 text-gray-500">Nenhum pet cadastrado.</div>
+
+  <div *ngIf="!loading && pets.length > 0" class="overflow-x-auto">
+    <table class="min-w-full bg-white rounded-md overflow-hidden">
+      <thead class="bg-gray-50 text-left">
+        <tr>
+          <th class="px-4 py-2">Nome</th>
+          <th class="px-4 py-2">Raça</th>
+          <th class="px-4 py-2">Idade</th>
+          <th class="px-4 py-2">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pet of pets" class="border-t">
+          <td class="px-4 py-3">{{ pet.nome }}</td>
+          <td class="px-4 py-3">{{ pet.raca || '-' }}</td>
+          <td class="px-4 py-3">{{ pet.idade != null ? pet.idade : '-' }}</td>
+          <td class="px-4 py-3">
+            <div class="flex gap-2">
+              <button (click)="edit(pet.id)" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Editar</button>
+              <button (click)="remove(pet.id)" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Excluir</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
