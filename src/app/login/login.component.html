@@ -1,0 +1,27 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+  <div class="max-w-md w-full bg-white shadow-md rounded-lg p-8">
+    <div class="text-center mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800">Entrar</h2>
+      <p class="text-sm text-gray-500 mt-1">Acesse sua conta para gerenciar pets</p>
+    </div>
+
+    <form (ngSubmit)="onSubmit()" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" [(ngModel)]="email" name="email" required
+               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Senha</label>
+        <input type="password" [(ngModel)]="password" name="password" required
+               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      </div>
+
+      <div>
+        <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none">Entrar</button>
+      </div>
+    </form>
+
+  </div>
+</div>
