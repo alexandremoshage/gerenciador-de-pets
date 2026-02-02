@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
+import { LoadingComponent } from '../loading/loading.component';
 import { PetService } from '../services/pet.service';
 import { PetResponse } from '../models/pet-response.model';
 import { finalize } from 'rxjs/operators';
@@ -10,7 +11,7 @@ import { finalize } from 'rxjs/operators';
 @Component({
   selector: 'app-pet-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent],
   templateUrl: './pet-list.component.html',
   styleUrls: ['./pet-list.component.scss']
 })
