@@ -3,6 +3,12 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "command": "npm run test:integration",
+      "name": "Run npm test:integration",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",
