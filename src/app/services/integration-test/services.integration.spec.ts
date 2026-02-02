@@ -29,14 +29,12 @@ describe('Integração Real com a API (Setup no beforeAll)', () => {
     petService = TestBed.inject(PetService);
     tutorService = TestBed.inject(TutorService);
 
-    // 1) Login (setup)
     const credenciais = { username: 'admin', password: 'admin' };
     const loginResponse = await lastValueFrom(authService.login(credenciais));
 
     expect(loginResponse.access_token).toBeDefined();
     expect(localStorage.getItem('access_token')).toEqual(loginResponse.access_token);
 
-    // 2) Criar Pet (setup)
     const novoPet: PetRequest = {
       nome: 'Pet Setup Integração ' + Date.now(),
       raca: 'Vira-lata Tech',
@@ -48,14 +46,12 @@ describe('Integração Real com a API (Setup no beforeAll)', () => {
 
     expect(createdPetId).toBeGreaterThan(0);
 
-    // 3) Criar Tutor (setup)
     const unique = Date.now();
     const novoTutor: TutorRequest = {
       nome: 'Tutor Setup ' + unique,
       email: `teste+${unique}@email.com`,
       telefone: '65999999999',
       endereco: 'Rua dos Testes, 0',
-      // se CPF precisa ser único, isso evita conflito fácil (11 dígitos)
       cpf: Number(String(unique).slice(-11).padStart(11, '1')),
     };
 
