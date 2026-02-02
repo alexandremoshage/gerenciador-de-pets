@@ -24,7 +24,7 @@ export class LoginComponent {
     this.auth.login({ username: this.email, password: this.password }).subscribe({
       next: () => {
         this.loading = false;
-        this.router.navigate(['/pets']);
+        this.router.navigate(['/']);
       },
       error: () => {
         this.loading = false;
