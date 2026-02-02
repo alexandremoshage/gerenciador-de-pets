@@ -10,10 +10,10 @@ import { PetRequest } from '../../models/pet-request.model';
   selector: 'app-pet-create',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './pet-create.component.html',
-  styleUrls: ['./pet-create.component.scss']
+  templateUrl: './pet-form.component.html',
+  styleUrls: ['./pet-form.component.scss']
 })
-export class PetCreateComponent {
+export class PetFormComponent {
   model: PetRequest = { nome: '', raca: '', idade: undefined };
   fotoFile?: File;
   loading = false;
