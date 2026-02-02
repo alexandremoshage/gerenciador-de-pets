@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './components/login/login.component';
 import { PetCreateComponent } from './components/pet-create/pet-create.component';
-import { PetListComponent } from './pet-list/pet-list.component';
+import { PetListComponent } from './components/pet-list/pet-list.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [

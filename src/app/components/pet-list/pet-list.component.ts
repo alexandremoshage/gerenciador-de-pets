@@ -4,8 +4,8 @@ import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/ro
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
-import { PetService } from '../services/pet.service';
-import { PetResponse } from '../models/pet-response.model';
+import { PetService } from '../../services/pet.service';
+import { PetResponse } from '../../models/pet-response.model';
 import { finalize } from 'rxjs/operators';
 
 @Component({
