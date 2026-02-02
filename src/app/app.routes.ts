@@ -6,6 +6,13 @@ import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
 	{ path: 'login', component: LoginComponent },
-	{ path: 'pets/create', component: PetFormComponent, canActivate: [authGuard] },
-	{ path: 'pets', component: PetListComponent, canActivate: [authGuard] },
+	{
+		path: 'pets',
+		component: PetListComponent,
+		canActivate: [authGuard],
+		children: [
+			{ path: 'create', component: PetFormComponent, canActivate: [authGuard] }
+		]
+	},
+	{ path: '', redirectTo: 'pets', pathMatch: 'full' },
 ];

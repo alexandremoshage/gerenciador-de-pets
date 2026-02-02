@@ -1,9 +1,11 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
+import { PetFormComponent } from '../pet-create/pet-form.component';
 import { PetService } from '../../services/pet.service';
 import { PetResponse } from '../../models/pet-response.model';
 import { finalize } from 'rxjs/operators';
@@ -11,7 +13,7 @@ import { finalize } from 'rxjs/operators';
 @Component({
   selector: 'app-pet-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent, PetFormComponent],
   templateUrl: './pet-list.component.html',
   styleUrls: ['./pet-list.component.scss']
 })
@@ -25,11 +27,22 @@ export class PetListComponent implements OnInit {
   pageSizeOptions = [5, 10, 20, 50];
   nomeFilter = '';
   racaFilter = '';
+  showFormModal = false;
+  selectedPetId?: number | null = null;
+  @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
 
-  constructor(private petService: PetService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
+  constructor(private petService: PetService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private location: Location) {}
 
   ngOnInit(): void {
     this.load();
+    // If user opened /pets/create (direct navigation) then open modal
+    const path = this.location.path();
+    if (path && path.indexOf('/pets/create') !== -1) {
+      const qp = this.route.snapshot.queryParams;
+      this.selectedPetId = qp['id'] ? +qp['id'] : null;
+      this.showFormModal = true;
+      setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+    }
   }
 
   load(): void {
@@ -106,11 +119,29 @@ export class PetListComponent implements OnInit {
   }
 
   create(): void {
-    this.router.navigate(['/pets/create']);
+    this.selectedPetId = null;
+    // update URL without navigating away so list stays visible
+    this.location.go('/pets/create');
+    this.showFormModal = true;
+    setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
   }
 
   edit(id: number): void {
-    this.router.navigate(['/pets/create'], { queryParams: { id } });
+    this.selectedPetId = id;
+    // update URL to reflect edit
+    this.location.go(`/pets/create?id=${id}`);
+    this.showFormModal = true;
+    setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+  }
+
+  closeModal(saved?: boolean): void {
+    this.showFormModal = false;
+    this.selectedPetId = null;
+    // restore URL to /pets without navigating
+    this.location.replaceState('/pets');
+    if (saved) {
+      this.load();
+    }
   }
 
   remove(id: number): void {

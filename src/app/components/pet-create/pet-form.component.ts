@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -13,7 +13,7 @@ import { PetService } from '../../services/pet.service';
   templateUrl: './pet-form.component.html',
   styleUrls: ['./pet-form.component.scss']
 })
-export class PetFormComponent implements OnInit, OnDestroy {
+export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
   nome = '';
   raca = '';
   idade?: number;
@@ -24,34 +24,53 @@ export class PetFormComponent implements OnInit, OnDestroy {
   isEdit = false;
   petId?: number;
 
+  @Input() petIdInput?: number | null = null; // when used as modal, parent sets this
+  @Input() openInModal = false;
+  @Output() close = new EventEmitter<boolean>();
+
   constructor(private petService: PetService, private router: Router, private route: ActivatedRoute, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       const id = params['id'];
       if (id) {
-        this.petId = +id;
-        this.isEdit = true;
-        this.loading = true;
-        this.petService.findById(this.petId).subscribe({
-          next: (res) => {
-            this.nome = res.nome ?? '';
-            this.raca = res.raca ?? '';
-            this.idade = res.idade;
-            this.fotoUrl = res.foto?.url ?? undefined;
-            if (this.fotoPreviewUrl) {
-              URL.revokeObjectURL(this.fotoPreviewUrl);
-              this.fotoPreviewUrl = undefined;
-            }
-            this.loading = false;
-            this.cd.detectChanges();
-          },
-          error: (err) => {
-            this.loading = false;
-            console.error('Erro ao carregar pet para edição', err);
-            alert('Erro ao carregar dados do pet para edição');
-          }
-        });
+        this.loadForId(+id);
+      }
+    });
+
+    if (this.petIdInput) {
+      this.loadForId(this.petIdInput);
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['petIdInput'] && this.petIdInput) {
+      this.loadForId(this.petIdInput);
+    }
+  }
+
+  private loadForId(id?: number | null): void {
+    if (!id) return;
+    this.petId = +id;
+    this.isEdit = true;
+    this.loading = true;
+    this.petService.findById(this.petId).subscribe({
+      next: (res) => {
+        this.nome = (res as any).nome ?? '';
+        this.raca = (res as any).raca ?? '';
+        this.idade = (res as any).idade;
+        this.fotoUrl = (res as any).foto?.url ?? undefined;
+        if (this.fotoPreviewUrl) {
+          URL.revokeObjectURL(this.fotoPreviewUrl);
+          this.fotoPreviewUrl = undefined;
+        }
+        this.loading = false;
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        this.loading = false;
+        console.error('Erro ao carregar pet para edição', err);
+        alert('Erro ao carregar dados do pet para edição');
       }
     });
   }
@@ -115,10 +134,18 @@ export class PetFormComponent implements OnInit, OnDestroy {
   private afterSuccess(): void {
     this.loading = false;
     alert(this.isEdit ? 'Pet atualizado com sucesso' : 'Pet cadastrado com sucesso');
-    this.router.navigate(['/pets']);
+    if (this.openInModal) {
+      this.close.emit(true);
+    } else {
+      this.router.navigate(['/pets']);
+    }
   }
 
   cancel(): void {
-    this.router.navigate(['/pets']);
+    if (this.openInModal) {
+      this.close.emit(false);
+    } else {
+      this.router.navigate(['/pets']);
+    }
   }
 }

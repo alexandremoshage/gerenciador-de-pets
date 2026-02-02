@@ -1,4 +1,11 @@
 <div class="p-6">
+  <div *ngIf="showFormModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal(false)">
+    <div #modalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">
+      <div class="bg-white rounded p-4">
+        <app-pet-create [petIdInput]="selectedPetId" [openInModal]="true" (close)="closeModal($event)"></app-pet-create>
+      </div>
+    </div>
+  </div>
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-semibold">Pets</h1>
     <button (click)="create()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Cadastrar Pet</button>
