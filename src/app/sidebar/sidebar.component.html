@@ -1,0 +1,15 @@
+<aside class="h-full flex flex-col">
+  <div class="flex items-center gap-2 px-2">
+    <div class="h-10 w-10 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold">GP</div>
+    <div>
+      <div class="text-sm font-semibold">Gerenciador</div>
+      <div class="text-xs text-gray-500">de Pets</div>
+    </div>
+  </div>
+
+  <nav class="mt-6 flex flex-col gap-1">
+    <ng-container *ngFor="let item of items">
+      <button  (click)="handle(item)" class="text-left w-full px-3 py-2 rounded hover:bg-gray-100">{{ item.label }}</button>
+    </ng-container>
+  </nav>
+</aside>

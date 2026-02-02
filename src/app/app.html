@@ -1,8 +1,6 @@
  
-<div class="fixed top-4 right-6 z-50 flex gap-3">
-  <a routerLink="/pets/create" class="inline-block px-4 py-2 bg-green-600 text-white rounded-md shadow hover:bg-green-700">Cadastrar Pet</a>
-  <a routerLink="/login" class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700">Entrar</a>
+<app-sidebar *ngIf="!isLogin" class="fixed inset-y-0 left-0 w-56 bg-white shadow-lg p-4"></app-sidebar>
+
+<div class="min-h-screen" [style.marginLeft.px]="!isLogin ? 224 : 0">
+  <router-outlet />
 </div>
-
-
-<router-outlet />
