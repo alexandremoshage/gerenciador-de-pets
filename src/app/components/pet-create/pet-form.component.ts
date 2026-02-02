@@ -18,8 +18,8 @@ export class PetFormComponent implements OnInit, OnDestroy {
   raca = '';
   idade?: number;
   fotoFile?: File;
-  fotoUrl?: string; // existing image URL from backend
-  fotoPreviewUrl?: string; // preview for newly selected file
+  fotoUrl?: string;
+  fotoPreviewUrl?: string; 
   loading = false;
   isEdit = false;
   petId?: number;
@@ -59,15 +59,12 @@ export class PetFormComponent implements OnInit, OnDestroy {
   onFileChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length) {
-      // revoke previous preview if present
       if (this.fotoPreviewUrl) {
         URL.revokeObjectURL(this.fotoPreviewUrl);
         this.fotoPreviewUrl = undefined;
       }
       this.fotoFile = input.files[0];
-      // create object URL for preview
       this.fotoPreviewUrl = URL.createObjectURL(this.fotoFile);
-      // ensure change detection updates the template
       this.cd.detectChanges();
     }
   }

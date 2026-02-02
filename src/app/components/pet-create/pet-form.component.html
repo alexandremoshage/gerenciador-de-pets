@@ -25,8 +25,7 @@
       <div>
         <label class="block text-sm font-medium text-gray-700">Foto</label>
         <input type="file" (change)="onFileChange($event)" accept="image/*" class="mt-1" />
-
-        <!-- Image preview: show existing foto (edit) or newly selected preview -->
+        
         <div *ngIf="isEdit || fotoPreviewUrl" class="mt-3">
           <div *ngIf="fotoPreviewUrl; else existingPhoto">
             <img [src]="fotoPreviewUrl" alt="Pré-visualização da foto" style="max-width:320px; max-height:320px; width:auto; height:auto; object-fit:contain; border-radius:6px;" />
