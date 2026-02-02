@@ -29,11 +29,6 @@ export class SidebarComponent {
       return;
     }
 
-    if (item.label === 'Pets') {
-      this.auth.logout();
-      this.router.navigate(['/pets']);
-      return;
-    }
     if (item.route) {
       this.router.navigate([item.route]);
     }

@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-  email = '';
+  username = '';
   password = '';
   remember = false;
   loading = false;
@@ -19,9 +19,9 @@ export class LoginComponent {
   constructor(private auth: AuthService, private router: Router) {}
 
   onSubmit(): void {
-    if (!this.email || !this.password) return;
+    if (!this.username || !this.password) return;
     this.loading = true;
-    this.auth.login({ username: this.email, password: this.password }).subscribe({
+    this.auth.login({ username: this.username, password: this.password }).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/']);
