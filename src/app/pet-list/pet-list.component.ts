@@ -21,6 +21,8 @@ export class PetListComponent implements OnInit {
   totalPages = 0;
   totalElements = 0;
   pageSizeOptions = [5, 10, 20, 50];
+  nomeFilter = '';
+  racaFilter = '';
 
   constructor(private petService: PetService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
 
@@ -30,7 +32,7 @@ export class PetListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.petService.findAll(this.currentPage, this.pageSize).pipe(
+    this.petService.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
       finalize(() => (this.loading = false))
     ).subscribe({
       next: (res) => {
@@ -54,6 +56,17 @@ export class PetListComponent implements OnInit {
     this.pageSize = newSize;
     this.currentPage = 0;
     this.load();
+  }
+
+  applyFilters(): void {
+    this.currentPage = 0;
+    this.load();
+  }
+
+  clearFilters(): void {
+    this.nomeFilter = '';
+    this.racaFilter = '';
+    this.applyFilters();
   }
 
   handlePageSizeChange(event: Event): void {
