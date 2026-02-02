@@ -21,7 +21,7 @@ export class PetService {
     return this.http.post<PetResponse>(this.API_URL, pet);
   }
 
-  findAll(page = 0, size = 10, nome?: string, raca?: string): Observable<PagedResponse<PetResponse>> {
+  findAll(page = 0, size = 99999999, nome?: string, raca?: string): Observable<PagedResponse<PetResponse>> {
     let params = new HttpParams()
       .set('page', page)
       .set('size', size);
