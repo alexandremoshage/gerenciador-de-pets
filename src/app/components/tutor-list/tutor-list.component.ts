@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
 import { TutorFormComponent } from '../tutor-create/tutor-form.component';
+import { TutorLinkComponent } from '../tutor-link/tutor-link.component';
 import { TutorService } from '../../services/tutor.service';
 import { TutorResponse } from '../../models/tutor-response.model';
 import { finalize } from 'rxjs/operators';
@@ -13,7 +14,7 @@ import { Location } from '@angular/common';
 @Component({
   selector: 'app-tutor-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent, TutorFormComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent, TutorFormComponent, TutorLinkComponent],
   templateUrl: './tutor-list.component.html',
   styleUrls: ['./tutor-list.component.scss']
 })
@@ -28,6 +29,8 @@ export class TutorListComponent implements OnInit {
   nomeFilter = '';
   showFormModal = false;
   selectedTutorId?: number | null = null;
+  showLinkModal = false;
+  selectedLinkTutorId?: number | null = null;
   @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
 
   constructor(private tutorService: TutorService, private cdr: ChangeDetectorRef, private location: Location) {}
@@ -35,12 +38,23 @@ export class TutorListComponent implements OnInit {
   ngOnInit(): void {
     this.load();
     const path = this.location.path();
-    if (path && path.indexOf('/tutores/create') !== -1) {
-      // attempt to parse id query param
-      const q = new URLSearchParams(path.split('?')[1] || '');
-      this.selectedTutorId = q.get('id') ? +q.get('id')! : null;
-      this.showFormModal = true;
-      setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+    if (path) {
+      if (path.indexOf('/tutor/create') !== -1) {
+        const q = new URLSearchParams(path.split('?')[1] || '');
+        this.selectedTutorId = q.get('id') ? +q.get('id')! : null;
+        this.showFormModal = true;
+        setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+      } else if (path.indexOf('/tutor/') !== -1 && path.indexOf('/link') !== -1) {
+        const parts = path.split('/');
+        const tutorIdx = parts.indexOf('tutor');
+        const idPart = parts[tutorIdx + 1];
+        const id = idPart ? +idPart : null;
+        if (id) {
+          this.selectedLinkTutorId = id;
+          this.showLinkModal = true;
+          setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+        }
+      }
     }
   }
 
@@ -66,22 +80,31 @@ export class TutorListComponent implements OnInit {
 
   create(): void {
     this.selectedTutorId = null;
-    this.location.go('/tutores/create');
+    this.location.go('/tutor/create');
     this.showFormModal = true;
     setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
   }
 
   edit(id: number): void {
     this.selectedTutorId = id;
-    this.location.go(`/tutores/create?id=${id}`);
+    this.location.go(`/tutor/create?id=${id}`);
     this.showFormModal = true;
+    setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+  }
+
+  openLink(id: number): void {
+    this.selectedLinkTutorId = id;
+    this.location.go(`/tutor/${id}/link`);
+    this.showLinkModal = true;
     setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
   }
 
   closeModal(saved?: boolean): void {
     this.showFormModal = false;
+    this.showLinkModal = false;
     this.selectedTutorId = null;
-    this.location.replaceState('/tutores');
+    this.selectedLinkTutorId = null;
+    this.location.replaceState('/tutor');
     if (saved) this.load();
   }
 

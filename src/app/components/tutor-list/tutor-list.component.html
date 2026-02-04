@@ -36,6 +36,7 @@
           <td class="px-4 py-3">{{ tutor.email || '-' }}</td>
           <td class="px-4 py-3">
             <div class="flex gap-2">
+              <button (click)="openLink(tutor.id)" class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Vincular Pet</button>
               <button (click)="edit(tutor.id)" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Editar</button>
               <button (click)="remove(tutor.id)" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Excluir</button>
             </div>
@@ -59,6 +60,13 @@
     <div #modalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">
       <div class="bg-white rounded p-4">
         <app-tutor-create [tutorIdInput]="selectedTutorId" [openInModal]="true" (close)="closeModal($event)"></app-tutor-create>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="showLinkModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal(false)">
+    <div #modalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">
+      <div class="bg-white rounded p-4">
+        <app-tutor-link [tutorId]="selectedLinkTutorId" [openInModal]="true" (close)="closeModal($event)"></app-tutor-link>
       </div>
     </div>
   </div>

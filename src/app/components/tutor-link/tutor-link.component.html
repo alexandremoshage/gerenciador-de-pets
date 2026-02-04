@@ -1,0 +1,57 @@
+<div class="max-w-3xl w-full">
+  <h3 class="text-lg font-semibold mb-4">Vincular Pets</h3>
+
+  <div class="mb-4 flex gap-3 items-end">
+    <div>
+      <label class="block text-sm text-gray-600">Nome</label>
+      <input type="text" [(ngModel)]="nomeFilter" class="mt-1 px-3 py-2 border border-gray-300 rounded-md" />
+    </div>
+    <div>
+      <label class="block text-sm text-gray-600">Raça</label>
+      <input type="text" [(ngModel)]="racaFilter" class="mt-1 px-3 py-2 border border-gray-300 rounded-md" />
+    </div>
+    <div class="flex gap-2">
+      <button (click)="applyFilters()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Pesquisar</button>
+      <button (click)="clearFilters()" class="px-4 py-2 border border-gray-300 rounded-md">Limpar</button>
+    </div>
+  </div>
+
+  <app-loading *ngIf="loading"></app-loading>
+  <div *ngIf="!loading">
+    <table class="min-w-full bg-white rounded-md overflow-hidden mb-4">
+      <thead class="bg-gray-50 text-left">
+        <tr>
+          <th class="px-4 py-2">&nbsp;</th>
+          <th class="px-4 py-2">Nome</th>
+          <th class="px-4 py-2">Raça</th>
+          <th class="px-4 py-2">Idade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pet of pets" class="border-t">
+          <td class="px-4 py-3">
+            <input type="checkbox" [checked]="linked.has(pet.id)" (change)="$event.target.checked ? toggle(pet.id, true) : toggle(pet.id, false)" />
+          </td>
+          <td class="px-4 py-3">{{ pet.nome }}</td>
+          <td class="px-4 py-3">{{ pet.raca || '-' }}</td>
+          <td class="px-4 py-3">{{ pet.idade != null ? pet.idade : '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="totalPages"
+      [pageSize]="pageSize"
+      [pageSizeOptions]="pageSizeOptions"
+      [totalElements]="totalElements"
+      (pageChange)="goToPage($event)"
+      (pageSizeChange)="onPageSizeChange($event)">
+    </app-pagination>
+
+    <div class="flex items-center gap-3 mt-4">
+      <button (click)="save()" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Salvar</button>
+      <a href="#" (click)="cancel(); $event.preventDefault()" class="text-sm text-gray-600 hover:underline">Cancelar</a>
+    </div>
+  </div>
+</div>

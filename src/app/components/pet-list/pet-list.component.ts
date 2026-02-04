@@ -35,7 +35,6 @@ export class PetListComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
-    // If user opened /pets/create (direct navigation) then open modal
     const path = this.location.path();
     if (path && path.indexOf('/pets/create') !== -1) {
       const qp = this.route.snapshot.queryParams;
@@ -120,7 +119,6 @@ export class PetListComponent implements OnInit {
 
   create(): void {
     this.selectedPetId = null;
-    // update URL without navigating away so list stays visible
     this.location.go('/pets/create');
     this.showFormModal = true;
     setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
@@ -128,7 +126,6 @@ export class PetListComponent implements OnInit {
 
   edit(id: number): void {
     this.selectedPetId = id;
-    // update URL to reflect edit
     this.location.go(`/pets/create?id=${id}`);
     this.showFormModal = true;
     setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
@@ -137,7 +134,6 @@ export class PetListComponent implements OnInit {
   closeModal(saved?: boolean): void {
     this.showFormModal = false;
     this.selectedPetId = null;
-    // restore URL to /pets without navigating
     this.location.replaceState('/pets');
     if (saved) {
       this.load();

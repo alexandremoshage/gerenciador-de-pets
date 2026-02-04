@@ -126,7 +126,7 @@ export class TutorFormComponent implements OnInit, OnDestroy {
     if (this.openInModal) {
       this.close.emit(true);
     } else {
-      this.router.navigate(['/tutores']);
+      this.router.navigate(['/tutor']);
     }
   }
 
@@ -134,7 +134,7 @@ export class TutorFormComponent implements OnInit, OnDestroy {
     if (this.openInModal) {
       this.close.emit(false);
     } else {
-      this.router.navigate(['/tutores']);
+      this.router.navigate(['/tutor']);
     }
   }
 }

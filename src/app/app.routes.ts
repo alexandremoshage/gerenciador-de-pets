@@ -19,8 +19,10 @@ export const routes: Routes = [
 		loadComponent: () => import('./components/tutor-list/tutor-list.component').then(m => m.TutorListComponent),
 		canActivate: [authGuard],
 		children: [
-			{ path: 'create', loadComponent: () => import('./components/tutor-create/tutor-form.component').then(m => m.TutorFormComponent), canActivate: [authGuard] }
+			{ path: 'create', loadComponent: () => import('./components/tutor-create/tutor-form.component').then(m => m.TutorFormComponent), canActivate: [authGuard] },
+			{ path: ':id/link', loadComponent: () => import('./components/tutor-link/tutor-link.component').then(m => m.TutorLinkComponent), canActivate: [authGuard] }
 		]
 	},
+
 	{ path: '', redirectTo: 'pets', pathMatch: 'full' },
 ];
