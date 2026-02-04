@@ -58,14 +58,14 @@
 
   <div *ngIf="showFormModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal(false)">
     <div #modalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">
-      <div class="bg-white rounded p-4">
+      <div class="bg-white  ">
         <app-tutor-create [tutorIdInput]="selectedTutorId" [openInModal]="true" (close)="closeModal($event)"></app-tutor-create>
       </div>
     </div>
   </div>
   <div *ngIf="showLinkModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal(false)">
     <div #modalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">
-      <div class="bg-white rounded p-4">
+      <div class="bg-white rounded p-4 ">
         <app-tutor-link [tutorId]="selectedLinkTutorId" [openInModal]="true" (close)="closeModal($event)"></app-tutor-link>
       </div>
     </div>
