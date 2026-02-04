@@ -6,7 +6,7 @@ import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
 import { TutorFormComponent } from '../tutor-create/tutor-form.component';
 import { TutorLinkComponent } from '../tutor-link/tutor-link.component';
-import { TutorService } from '../../services/tutor.service';
+import { TutorFacade } from '../../facades/tutor.facade';
 import { TutorResponse } from '../../models/tutor-response.model';
 import { PagedResponse } from '../../models/paged-response.model';
 import { finalize } from 'rxjs/operators';
@@ -34,7 +34,7 @@ export class TutorListComponent implements OnInit {
   selectedLinkTutorId?: number | null = null;
   @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
 
-  constructor(private tutorService: TutorService, private cdr: ChangeDetectorRef, private location: Location) {}
+  constructor(private tutorFacade: TutorFacade, private cdr: ChangeDetectorRef, private location: Location) {}
 
   ngOnInit(): void {
     this.load();
@@ -61,7 +61,7 @@ export class TutorListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.tutorService.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined).pipe(finalize(() => (this.loading = false))).subscribe({
+    this.tutorFacade.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined).pipe(finalize(() => (this.loading = false))).subscribe({
       next: (body: PagedResponse<TutorResponse>) => {
         this.tutors = body.content ?? [];
         this.totalPages = body.pageCount ?? 1;
@@ -125,6 +125,6 @@ export class TutorListComponent implements OnInit {
 
   remove(id: number): void {
     if (!confirm('Confirma exclusão do tutor?')) return;
-    this.tutorService.delete(id).subscribe({ next: () => this.load(), error: () => alert('Erro ao excluir tutor') });
+    this.tutorFacade.delete(id).subscribe({ next: () => this.load(), error: () => alert('Erro ao excluir tutor') });
   }
 }

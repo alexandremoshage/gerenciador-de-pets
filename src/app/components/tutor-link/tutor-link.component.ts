@@ -1,8 +1,8 @@
 import { ChangeDetectorRef, Component, DestroyRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { TutorService } from '../../services/tutor.service';
-import { PetService } from '../../services/pet.service';
+import { TutorFacade } from '../../facades/tutor.facade';
+import { PetFacade } from '../../facades/pet.facade';
 import { forkJoin } from 'rxjs';
 import { finalize, switchMap, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -39,7 +39,7 @@ export class TutorLinkComponent implements OnInit, OnChanges {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private tutorService: TutorService, private petService: PetService, private cdr: ChangeDetectorRef) {}
+  constructor(private tutorFacade: TutorFacade, private petFacade: PetFacade, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     if (this.tutorId != null) {
@@ -77,7 +77,7 @@ export class TutorLinkComponent implements OnInit, OnChanges {
   }
 
   private loadTutor(tutorId: number) {
-    return this.tutorService.findById(tutorId).pipe(
+    return this.tutorFacade.findById(tutorId).pipe(
       tap((tutor: TutorResponse) => {
         const ids = new Set<number>((tutor.pets ?? []).map(p => p.id));
         this.initialLinked = ids;
@@ -89,7 +89,7 @@ export class TutorLinkComponent implements OnInit, OnChanges {
   private loadPetsPage(page: number, size: number) {
     this.currentPage = page;
     this.pageSize = size;
-    return this.petService.findAll(page, size, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
+    return this.petFacade.findAll(page, size, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
       tap((body: PagedResponse<PetResponse>) => {
         this.pets = body.content ?? [];
         this.totalPages = body.pageCount ?? 1;
@@ -133,8 +133,8 @@ export class TutorLinkComponent implements OnInit, OnChanges {
     }
 
     const ops = [
-      ...toLink.map((id) => this.tutorService.linkPet(this.tutorId!, id)),
-      ...toUnlink.map((id) => this.tutorService.unlinkPet(this.tutorId!, id))
+      ...toLink.map((id) => this.tutorFacade.linkPet(this.tutorId!, id)),
+      ...toUnlink.map((id) => this.tutorFacade.unlinkPet(this.tutorId!, id))
     ];
 
     this.loading = true;

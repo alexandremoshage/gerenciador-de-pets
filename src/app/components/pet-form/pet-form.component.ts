@@ -4,10 +4,11 @@ import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
-import { PetService } from '../../services/pet.service';
+import { PetFacade } from '../../facades/pet.facade';
 import { PetCompletoResponse } from '../../models/pet-completo-response';
 import { PetResponse } from '../../models/pet-response.model';
 import { PetRequest } from '../../models/pet-request.model';
+import { ValidationError } from '../../validators/validation-error';
 
 @Component({
   selector: 'app-pet-create',
@@ -26,12 +27,13 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
   loading = false;
   isEdit = false;
   petId?: number;
+  errorMessage?: string;
 
   @Input() petIdInput?: number | null = null; // when used as modal, parent sets this
   @Input() openInModal = false;
   @Output() close = new EventEmitter<boolean>();
 
-  constructor(private petService: PetService, private router: Router, private route: ActivatedRoute, private cd: ChangeDetectorRef) {}
+  constructor(private petFacade: PetFacade, private router: Router, private route: ActivatedRoute, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -57,7 +59,8 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
     this.petId = +id;
     this.isEdit = true;
     this.loading = true;
-    this.petService.findById(this.petId).subscribe({
+    this.errorMessage = undefined;
+    this.petFacade.findById(this.petId).subscribe({
       next: (res: PetCompletoResponse) => {
         this.nome = res.nome ?? '';
         this.raca = res.raca ?? '';
@@ -73,7 +76,7 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
       error: (err) => {
         this.loading = false;
         console.error('Erro ao carregar pet para edição', err);
-        alert('Erro ao carregar dados do pet para edição');
+        this.errorMessage = 'Erro ao carregar dados do pet para edição.';
       }
     });
   }
@@ -99,12 +102,12 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   submit(): void {
-    if (!this.nome) return;
+    this.errorMessage = undefined;
     this.loading = true;
 
     const finalizeSuccess = (resId?: number) => {
       if (this.fotoFile && resId) {
-        this.petService.uploadPhoto(resId, this.fotoFile!).subscribe({
+        this.petFacade.uploadPhoto(resId, this.fotoFile!).subscribe({
           next: () => this.afterSuccess(),
           error: () => this.afterSuccess()
         });
@@ -115,20 +118,28 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
 
     if (this.isEdit && this.petId) {
       const payload: PetRequest = { nome: this.nome, raca: this.raca || undefined, idade: this.idade };
-      this.petService.update(this.petId, payload).subscribe({
+      this.petFacade.update(this.petId, payload).subscribe({
         next: (res: PetResponse) => finalizeSuccess(res.id ?? this.petId),
-        error: () => {
+        error: (err) => {
           this.loading = false;
-          alert('Erro ao atualizar pet');
+          if (err instanceof ValidationError) {
+            this.errorMessage = err.message;
+            return;
+          }
+          this.errorMessage = 'Erro ao atualizar pet.';
         }
       });
     } else {
       const payload: PetRequest = { nome: this.nome, raca: this.raca || undefined, idade: this.idade };
-      this.petService.create(payload).subscribe({
+      this.petFacade.create(payload).subscribe({
         next: (res: PetResponse) => finalizeSuccess(res.id),
-        error: () => {
+        error: (err) => {
           this.loading = false;
-          alert('Erro ao criar pet');
+          if (err instanceof ValidationError) {
+            this.errorMessage = err.message;
+            return;
+          }
+          this.errorMessage = 'Erro ao criar pet.';
         }
       });
     }
@@ -136,6 +147,7 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
 
   private afterSuccess(): void {
     this.loading = false;
+    this.errorMessage = undefined;
     alert(this.isEdit ? 'Pet atualizado com sucesso' : 'Pet cadastrado com sucesso');
     if (this.openInModal) {
       this.close.emit(true);
@@ -145,6 +157,7 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   cancel(): void {
+    this.errorMessage = undefined;
     if (this.openInModal) {
       this.close.emit(false);
     } else {

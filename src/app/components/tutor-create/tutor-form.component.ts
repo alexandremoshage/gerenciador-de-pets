@@ -2,9 +2,10 @@ import { Component, OnInit, ChangeDetectorRef, OnDestroy, Input, Output, EventEm
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { TutorService } from '../../services/tutor.service';
+import { TutorFacade } from '../../facades/tutor.facade';
 import { TutorResponse } from '../../models/tutor-response.model';
 import { TutorRequest } from '../../models/tutor-request.model';
+import { ValidationError } from '../../validators/validation-error';
 
 @Component({
   selector: 'app-tutor-create',
@@ -25,12 +26,13 @@ export class TutorFormComponent implements OnInit, OnDestroy {
   loading = false;
   isEdit = false;
   tutorId?: number;
+  errorMessage?: string;
 
   @Input() tutorIdInput?: number | null = null;
   @Input() openInModal = false;
   @Output() close = new EventEmitter<boolean>();
 
-  constructor(private tutorService: TutorService, private router: Router, private cd: ChangeDetectorRef) {}
+  constructor(private tutorFacade: TutorFacade, private router: Router, private cd: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     if (this.tutorIdInput) {
@@ -43,7 +45,8 @@ export class TutorFormComponent implements OnInit, OnDestroy {
     this.tutorId = +id;
     this.isEdit = true;
     this.loading = true;
-    this.tutorService.findById(this.tutorId).subscribe({
+    this.errorMessage = undefined;
+    this.tutorFacade.findById(this.tutorId).subscribe({
       next: (res: TutorResponse) => {
         this.nome = res.nome ?? '';
         this.email = res.email ?? '';
@@ -61,7 +64,7 @@ export class TutorFormComponent implements OnInit, OnDestroy {
       error: (err) => {
         this.loading = false;
         console.error('Erro ao carregar tutor para edição', err);
-        alert('Erro ao carregar dados do tutor para edição');
+        this.errorMessage = 'Erro ao carregar dados do tutor para edição.';
       }
     });
   }
@@ -87,12 +90,12 @@ export class TutorFormComponent implements OnInit, OnDestroy {
   }
 
   submit(): void {
-    if (!this.nome || !this.telefone) return;
+    this.errorMessage = undefined;
     this.loading = true;
 
     const finalizeSuccess = (resId?: number) => {
       if (this.fotoFile && resId) {
-        this.tutorService.uploadPhoto(resId, this.fotoFile!).subscribe({
+        this.tutorFacade.uploadPhoto(resId, this.fotoFile!).subscribe({
           next: () => this.afterSuccess(),
           error: () => this.afterSuccess()
         });
@@ -104,19 +107,27 @@ export class TutorFormComponent implements OnInit, OnDestroy {
     const payload: TutorRequest = { nome: this.nome, email: this.email || undefined, telefone: this.telefone, endereco: this.endereco || undefined, cpf: this.cpf };
 
     if (this.isEdit && this.tutorId) {
-      this.tutorService.update(this.tutorId, payload).subscribe({
+      this.tutorFacade.update(this.tutorId, payload).subscribe({
         next: (res: TutorResponse) => finalizeSuccess(res.id ?? this.tutorId),
-        error: () => {
+        error: (err) => {
           this.loading = false;
-          alert('Erro ao atualizar tutor');
+          if (err instanceof ValidationError) {
+            this.errorMessage = err.message;
+            return;
+          }
+          this.errorMessage = 'Erro ao atualizar tutor.';
         }
       });
     } else {
-      this.tutorService.create(payload).subscribe({
+      this.tutorFacade.create(payload).subscribe({
         next: (res: TutorResponse) => finalizeSuccess(res.id),
-        error: () => {
+        error: (err) => {
           this.loading = false;
-          alert('Erro ao criar tutor');
+          if (err instanceof ValidationError) {
+            this.errorMessage = err.message;
+            return;
+          }
+          this.errorMessage = 'Erro ao criar tutor.';
         }
       });
     }
@@ -124,6 +135,7 @@ export class TutorFormComponent implements OnInit, OnDestroy {
 
   private afterSuccess(): void {
     this.loading = false;
+    this.errorMessage = undefined;
     alert(this.isEdit ? 'Tutor atualizado com sucesso' : 'Tutor cadastrado com sucesso');
     if (this.openInModal) {
       this.close.emit(true);
@@ -133,6 +145,7 @@ export class TutorFormComponent implements OnInit, OnDestroy {
   }
 
   cancel(): void {
+    this.errorMessage = undefined;
     if (this.openInModal) {
       this.close.emit(false);
     } else {

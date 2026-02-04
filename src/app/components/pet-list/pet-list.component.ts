@@ -6,7 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
 import { PetFormComponent } from '../pet-form/pet-form.component';
-import { PetService } from '../../services/pet.service';
+import { PetFacade } from '../../facades/pet.facade';
 import { PetResponse } from '../../models/pet-response.model';
 import { PagedResponse } from '../../models/paged-response.model';
 import { finalize } from 'rxjs/operators';
@@ -32,7 +32,7 @@ export class PetListComponent implements OnInit {
   selectedPetId?: number | null = null;
   @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
 
-  constructor(private petService: PetService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private location: Location) {}
+  constructor(private petFacade: PetFacade, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private location: Location) {}
 
   ngOnInit(): void {
     this.load();
@@ -47,7 +47,7 @@ export class PetListComponent implements OnInit {
 
   load(): void {
     this.loading = true;
-    this.petService.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
+    this.petFacade.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
       finalize(() => (this.loading = false))
     ).subscribe({
       next: (body: PagedResponse<PetResponse>) => {
@@ -136,7 +136,7 @@ export class PetListComponent implements OnInit {
 
   remove(id: number): void {
     if (!confirm('Confirma exclusão do pet?')) return;
-    this.petService.delete(id).subscribe({
+    this.petFacade.delete(id).subscribe({
       next: () => this.load(),
       error: () => alert('Erro ao excluir pet')
     });
