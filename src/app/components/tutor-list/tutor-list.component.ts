@@ -8,6 +8,7 @@ import { TutorFormComponent } from '../tutor-create/tutor-form.component';
 import { TutorLinkComponent } from '../tutor-link/tutor-link.component';
 import { TutorService } from '../../services/tutor.service';
 import { TutorResponse } from '../../models/tutor-response.model';
+import { PagedResponse } from '../../models/paged-response.model';
 import { finalize } from 'rxjs/operators';
 import { Location } from '@angular/common';
 
@@ -61,17 +62,10 @@ export class TutorListComponent implements OnInit {
   load(): void {
     this.loading = true;
     this.tutorService.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (res) => {
-        const body = res as any;
-        if (body && body.content) {
-          this.tutors = body.content;
-          this.totalPages = body.pageCount ?? 1;
-          this.totalElements = body.total ?? 0;
-        } else if (body instanceof Array) {
-          this.tutors = body;
-          this.totalPages = 1;
-          this.totalElements = body.length;
-        }
+      next: (body: PagedResponse<TutorResponse>) => {
+        this.tutors = body.content ?? [];
+        this.totalPages = body.pageCount ?? 1;
+        this.totalElements = body.total ?? 0;
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Erro ao carregar tutores:', err)

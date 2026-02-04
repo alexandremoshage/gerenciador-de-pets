@@ -5,6 +5,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
 import { PetService } from '../../services/pet.service';
+import { PetCompletoResponse } from '../../models/pet-completo-response';
+import { PetResponse } from '../../models/pet-response.model';
+import { PetRequest } from '../../models/pet-request.model';
 
 @Component({
   selector: 'app-pet-create',
@@ -55,11 +58,11 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
     this.isEdit = true;
     this.loading = true;
     this.petService.findById(this.petId).subscribe({
-      next: (res) => {
-        this.nome = (res as any).nome ?? '';
-        this.raca = (res as any).raca ?? '';
-        this.idade = (res as any).idade;
-        this.fotoUrl = (res as any).foto?.url ?? undefined;
+      next: (res: PetCompletoResponse) => {
+        this.nome = res.nome ?? '';
+        this.raca = res.raca ?? '';
+        this.idade = res.idade;
+        this.fotoUrl = res.foto?.url ?? undefined;
         if (this.fotoPreviewUrl) {
           URL.revokeObjectURL(this.fotoPreviewUrl);
           this.fotoPreviewUrl = undefined;
@@ -111,18 +114,18 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
     };
 
     if (this.isEdit && this.petId) {
-      const payload = { nome: this.nome, raca: this.raca, idade: this.idade };
+      const payload: PetRequest = { nome: this.nome, raca: this.raca || undefined, idade: this.idade };
       this.petService.update(this.petId, payload).subscribe({
-        next: (res) => finalizeSuccess((res as any).id ?? this.petId),
+        next: (res: PetResponse) => finalizeSuccess(res.id ?? this.petId),
         error: () => {
           this.loading = false;
           alert('Erro ao atualizar pet');
         }
       });
     } else {
-      const payload = { nome: this.nome, raca: this.raca, idade: this.idade };
+      const payload: PetRequest = { nome: this.nome, raca: this.raca || undefined, idade: this.idade };
       this.petService.create(payload).subscribe({
-        next: (res) => finalizeSuccess((res as any).id),
+        next: (res: PetResponse) => finalizeSuccess(res.id),
         error: () => {
           this.loading = false;
           alert('Erro ao criar pet');

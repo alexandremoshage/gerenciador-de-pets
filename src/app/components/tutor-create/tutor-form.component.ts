@@ -3,6 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TutorService } from '../../services/tutor.service';
+import { TutorResponse } from '../../models/tutor-response.model';
+import { TutorRequest } from '../../models/tutor-request.model';
 
 @Component({
   selector: 'app-tutor-create',
@@ -42,13 +44,13 @@ export class TutorFormComponent implements OnInit, OnDestroy {
     this.isEdit = true;
     this.loading = true;
     this.tutorService.findById(this.tutorId).subscribe({
-      next: (res) => {
-        this.nome = (res as any).nome ?? '';
-        this.email = (res as any).email ?? '';
-        this.telefone = (res as any).telefone ?? '';
-        this.endereco = (res as any).endereco ?? '';
-        this.cpf = (res as any).cpf ?? undefined;
-        this.fotoUrl = (res as any).foto?.url ?? undefined;
+      next: (res: TutorResponse) => {
+        this.nome = res.nome ?? '';
+        this.email = res.email ?? '';
+        this.telefone = res.telefone ?? '';
+        this.endereco = res.endereco ?? '';
+        this.cpf = res.cpf ?? undefined;
+        this.fotoUrl = res.foto?.url ?? undefined;
         if (this.fotoPreviewUrl) {
           URL.revokeObjectURL(this.fotoPreviewUrl);
           this.fotoPreviewUrl = undefined;
@@ -99,19 +101,19 @@ export class TutorFormComponent implements OnInit, OnDestroy {
       }
     };
 
-    const payload = { nome: this.nome, email: this.email || undefined, telefone: this.telefone, endereco: this.endereco || undefined, cpf: this.cpf };
+    const payload: TutorRequest = { nome: this.nome, email: this.email || undefined, telefone: this.telefone, endereco: this.endereco || undefined, cpf: this.cpf };
 
     if (this.isEdit && this.tutorId) {
-      this.tutorService.update(this.tutorId, payload as any).subscribe({
-        next: (res) => finalizeSuccess((res as any).id ?? this.tutorId),
+      this.tutorService.update(this.tutorId, payload).subscribe({
+        next: (res: TutorResponse) => finalizeSuccess(res.id ?? this.tutorId),
         error: () => {
           this.loading = false;
           alert('Erro ao atualizar tutor');
         }
       });
     } else {
-      this.tutorService.create(payload as any).subscribe({
-        next: (res) => finalizeSuccess((res as any).id),
+      this.tutorService.create(payload).subscribe({
+        next: (res: TutorResponse) => finalizeSuccess(res.id),
         error: () => {
           this.loading = false;
           alert('Erro ao criar tutor');

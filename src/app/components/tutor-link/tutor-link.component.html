@@ -18,26 +18,28 @@
 
   <app-loading *ngIf="loading"></app-loading>
   <div *ngIf="!loading">
-    <table class="min-w-full bg-white rounded-md overflow-hidden mb-4">
-      <thead class="bg-gray-50 text-left">
-        <tr>
-          <th class="px-4 py-2">&nbsp;</th>
-          <th class="px-4 py-2">Nome</th>
-          <th class="px-4 py-2">Raça</th>
-          <th class="px-4 py-2">Idade</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let pet of pets" class="border-t">
-          <td class="px-4 py-3">
-            <input type="checkbox" [checked]="linked.has(pet.id)" (change)="$event.target.checked ? toggle(pet.id, true) : toggle(pet.id, false)" />
-          </td>
-          <td class="px-4 py-3">{{ pet.nome }}</td>
-          <td class="px-4 py-3">{{ pet.raca || '-' }}</td>
-          <td class="px-4 py-3">{{ pet.idade != null ? pet.idade : '-' }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="max-h-[50vh] overflow-y-auto border border-gray-200 rounded-md mb-4">
+      <table class="min-w-full bg-white">
+        <thead class="bg-gray-50 text-left sticky top-0 z-10">
+          <tr>
+            <th class="px-4 py-2">&nbsp;</th>
+            <th class="px-4 py-2">Nome</th>
+            <th class="px-4 py-2">Raça</th>
+            <th class="px-4 py-2">Idade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pet of pets" class="border-t">
+            <td class="px-4 py-3">
+              <input type="checkbox" [checked]="linked.has(pet.id)" (change)="$event.target.checked ? toggle(pet.id, true) : toggle(pet.id, false)" />
+            </td>
+            <td class="px-4 py-3">{{ pet.nome }}</td>
+            <td class="px-4 py-3">{{ pet.raca || '-' }}</td>
+            <td class="px-4 py-3">{{ pet.idade != null ? pet.idade : '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <app-pagination
       [currentPage]="currentPage"

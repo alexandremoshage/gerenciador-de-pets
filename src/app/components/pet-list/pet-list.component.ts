@@ -8,6 +8,7 @@ import { LoadingComponent } from '../loading/loading.component';
 import { PetFormComponent } from '../pet-form/pet-form.component';
 import { PetService } from '../../services/pet.service';
 import { PetResponse } from '../../models/pet-response.model';
+import { PagedResponse } from '../../models/paged-response.model';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -49,17 +50,10 @@ export class PetListComponent implements OnInit {
     this.petService.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
       finalize(() => (this.loading = false))
     ).subscribe({
-      next: (res) => {
-        const body = res as any;
-        if (body && body.content) {
-          this.pets = body.content;
-          this.totalPages = body.pageCount ?? 1;
-          this.totalElements = body.total ?? 0;
-        } else if (body instanceof Array) {
-          this.pets = body;
-          this.totalPages = 1;
-          this.totalElements = body.length;
-        }
+      next: (body: PagedResponse<PetResponse>) => {
+        this.pets = body.content ?? [];
+        this.totalPages = body.pageCount ?? 1;
+        this.totalElements = body.total ?? 0;
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Erro ao carregar pets:', err)

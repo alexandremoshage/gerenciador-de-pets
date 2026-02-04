@@ -1,4 +1,4 @@
-import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { catchError, switchMap, throwError } from 'rxjs';
@@ -7,7 +7,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const accessToken = authService.getAccessToken();
 
-  const addTokenHeader = (request: any, token: string) => {
+  const addTokenHeader = (request: HttpRequest<unknown>, token: string): HttpRequest<unknown> => {
     return request.clone({
       setHeaders: { Authorization: `Bearer ${token}` }
     });

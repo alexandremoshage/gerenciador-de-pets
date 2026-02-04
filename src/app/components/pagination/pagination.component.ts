@@ -34,6 +34,11 @@ export class PaginationComponent {
     this.pageSizeChange.emit(value);
   }
 
+  changePageSizeFromEvent(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    this.changePageSize(+value);
+  }
+
   getPageNumbers(): number[] {
     const pages: number[] = [];
     const maxVisible = 5;
