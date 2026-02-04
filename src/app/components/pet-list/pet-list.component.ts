@@ -1,15 +1,15 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
 import { PetFormComponent } from '../pet-form/pet-form.component';
 import { PetFacade } from '../../facades/pet.facade';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { PetResponse } from '../../models/pet-response.model';
-import { PagedResponse } from '../../models/paged-response.model';
-import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-pet-list',
@@ -19,12 +19,13 @@ import { finalize } from 'rxjs/operators';
   styleUrls: ['./pet-list.component.scss']
 })
 export class PetListComponent implements OnInit {
-  pets: PetResponse[] = [];
-  loading = false;
+  readonly pets$: Observable<PetResponse[]>;
+  readonly loading$: Observable<boolean>;
+  readonly totalPages$: Observable<number>;
+  readonly totalElements$: Observable<number>;
+
   currentPage = 0;
   pageSize = 5;
-  totalPages = 0;
-  totalElements = 0;
   pageSizeOptions = [5, 10, 20, 50];
   nomeFilter = '';
   racaFilter = '';
@@ -32,7 +33,12 @@ export class PetListComponent implements OnInit {
   selectedPetId?: number | null = null;
   @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
 
-  constructor(private petFacade: PetFacade, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private location: Location) {}
+  constructor(private petFacade: PetFacade, private route: ActivatedRoute, private location: Location) {
+    this.pets$ = this.petFacade.pets$;
+    this.loading$ = this.petFacade.loading$;
+    this.totalPages$ = this.petFacade.petsPage$.pipe(map((p) => p?.pageCount ?? 1));
+    this.totalElements$ = this.petFacade.petsPage$.pipe(map((p) => p?.total ?? 0));
+  }
 
   ngOnInit(): void {
     this.load();
@@ -46,18 +52,7 @@ export class PetListComponent implements OnInit {
   }
 
   load(): void {
-    this.loading = true;
-    this.petFacade.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
-      finalize(() => (this.loading = false))
-    ).subscribe({
-      next: (body: PagedResponse<PetResponse>) => {
-        this.pets = body.content ?? [];
-        this.totalPages = body.pageCount ?? 1;
-        this.totalElements = body.total ?? 0;
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Erro ao carregar pets:', err)
-    });
+    this.petFacade.loadPetsPage(this.currentPage, this.pageSize, this.nomeFilter || undefined, this.racaFilter || undefined);
   }
 
   onPageSizeChange(newSize: number): void {
@@ -83,7 +78,7 @@ export class PetListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 0 && page < this.totalPages) {
+    if (page >= 0) {
       this.currentPage = page;
       this.load();
     }
@@ -95,20 +90,6 @@ export class PetListComponent implements OnInit {
 
   nextPage(): void {
     this.goToPage(this.currentPage + 1);
-  }
-
-  getPageNumbers(): number[] {
-    const pages: number[] = [];
-    const maxVisible = 5;
-    let start = Math.max(0, this.currentPage - Math.floor(maxVisible / 2));
-    const end = Math.min(this.totalPages, start + maxVisible);
-    if (end - start < maxVisible) {
-      start = Math.max(0, end - maxVisible);
-    }
-    for (let i = start; i < end; i++) {
-      pages.push(i);
-    }
-    return pages;
   }
 
   create(): void {

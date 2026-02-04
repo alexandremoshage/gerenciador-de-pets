@@ -1,14 +1,13 @@
-import { ChangeDetectorRef, Component, DestroyRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TutorFacade } from '../../facades/tutor.facade';
 import { PetFacade } from '../../facades/pet.facade';
-import { forkJoin } from 'rxjs';
-import { finalize, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
+import { filter, finalize, map, take } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TutorResponse } from '../../models/tutor-response.model';
 import { PetResponse } from '../../models/pet-response.model';
-import { PagedResponse } from '../../models/paged-response.model';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
 
@@ -24,10 +23,14 @@ export class TutorLinkComponent implements OnInit, OnChanges {
   @Input() openInModal = false;
   @Output() close = new EventEmitter<boolean>();
 
-  pets: PetResponse[] = [];
+  readonly pets$: Observable<PetResponse[]>;
+  readonly totalPages$: Observable<number>;
+  readonly totalElements$: Observable<number>;
+
   linked = new Set<number>();
   private initialLinked = new Set<number>();
-  loading = false;
+  private readonly saving$ = new BehaviorSubject<boolean>(false);
+  readonly loading$: Observable<boolean>;
 
   currentPage = 0;
   pageSize = 5;
@@ -39,7 +42,12 @@ export class TutorLinkComponent implements OnInit, OnChanges {
 
   private readonly destroyRef = inject(DestroyRef);
 
-  constructor(private tutorFacade: TutorFacade, private petFacade: PetFacade, private cdr: ChangeDetectorRef) {}
+  constructor(private tutorFacade: TutorFacade, private petFacade: PetFacade) {
+    this.pets$ = this.petFacade.pets$;
+    this.totalPages$ = this.petFacade.petsPage$.pipe(map((p) => p?.pageCount ?? 1));
+    this.totalElements$ = this.petFacade.petsPage$.pipe(map((p) => p?.total ?? 0));
+    this.loading$ = combineLatest([this.petFacade.loading$, this.tutorFacade.loading$, this.saving$]).pipe(map(([a, b, c]) => a || b || c));
+  }
 
   ngOnInit(): void {
     if (this.tutorId != null) {
@@ -60,53 +68,37 @@ export class TutorLinkComponent implements OnInit, OnChanges {
 
   private initForTutor(tutorId: number): void {
     this.currentPage = 0;
-    this.loading = true;
 
-    this.loadTutor(tutorId)
+    this.tutorFacade.loadTutorById(tutorId);
+    this.tutorFacade.selectedTutor$
       .pipe(
-        switchMap(() => this.loadPetsPage(0, this.pageSize)),
-        finalize(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
-        }),
+        filter((tutor): tutor is TutorResponse => !!tutor && tutor.id === tutorId),
+        take(1),
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe({
-        error: (err) => console.error('Erro ao carregar dados para vinculação', err)
+        next: (tutor) => {
+          const ids = new Set<number>((tutor.pets ?? []).map((p) => p.id));
+          this.initialLinked = ids;
+          this.linked = new Set<number>(ids);
+        },
+        error: (err) => console.error('Erro ao carregar tutor para vinculação', err)
       });
+
+    this.loadPetsPage(0, this.pageSize);
   }
 
-  private loadTutor(tutorId: number) {
-    return this.tutorFacade.findById(tutorId).pipe(
-      tap((tutor: TutorResponse) => {
-        const ids = new Set<number>((tutor.pets ?? []).map(p => p.id));
-        this.initialLinked = ids;
-        this.linked = new Set<number>(ids);
-      })
-    );
-  }
-
-  private loadPetsPage(page: number, size: number) {
+  private loadPetsPage(page: number, size: number): void {
     this.currentPage = page;
     this.pageSize = size;
-    return this.petFacade.findAll(page, size, this.nomeFilter || undefined, this.racaFilter || undefined).pipe(
-      tap((body: PagedResponse<PetResponse>) => {
-        this.pets = body.content ?? [];
-        this.totalPages = body.pageCount ?? 1;
-        this.totalElements = body.total ?? 0;
-      })
-    );
+    this.petFacade.loadPetsPage(page, size, this.nomeFilter || undefined, this.racaFilter || undefined);
   }
 
   private resetState(): void {
-    this.pets = [];
     this.linked = new Set<number>();
     this.initialLinked = new Set<number>();
-    this.loading = false;
     this.currentPage = 0;
-    this.totalPages = 0;
-    this.totalElements = 0;
-    this.cdr.markForCheck();
+    this.tutorFacade.clearSelectedTutor();
   }
 
 
@@ -137,12 +129,11 @@ export class TutorLinkComponent implements OnInit, OnChanges {
       ...toUnlink.map((id) => this.tutorFacade.unlinkPet(this.tutorId!, id))
     ];
 
-    this.loading = true;
+    this.saving$.next(true);
     forkJoin(ops)
       .pipe(
         finalize(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
+          this.saving$.next(false);
         }),
         takeUntilDestroyed(this.destroyRef)
       )
@@ -156,50 +147,15 @@ export class TutorLinkComponent implements OnInit, OnChanges {
   }
 
   goToPage(page: number): void {
-    if (page >= 0 && page < this.totalPages) {
-      this.loading = true;
-      this.loadPetsPage(page, this.pageSize)
-        .pipe(
-          finalize(() => {
-            this.loading = false;
-            this.cdr.markForCheck();
-          }),
-          takeUntilDestroyed(this.destroyRef)
-        )
-        .subscribe({
-          error: (err) => console.error('Erro ao carregar pets para vinculação', err)
-        });
-    }
+    if (page >= 0) this.loadPetsPage(page, this.pageSize);
   }
 
   onPageSizeChange(newSize: number): void {
-    this.loading = true;
-    this.loadPetsPage(0, newSize)
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe({
-        error: (err) => console.error('Erro ao carregar pets para vinculação', err)
-      });
+    this.loadPetsPage(0, newSize);
   }
 
   applyFilters(): void {
-    this.loading = true;
-    this.loadPetsPage(0, this.pageSize)
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-          this.cdr.markForCheck();
-        }),
-        takeUntilDestroyed(this.destroyRef)
-      )
-      .subscribe({
-        error: (err) => console.error('Erro ao carregar pets para vinculação', err)
-      });
+    this.loadPetsPage(0, this.pageSize);
   }
 
   clearFilters(): void {

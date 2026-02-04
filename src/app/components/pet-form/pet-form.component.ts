@@ -29,7 +29,7 @@ export class PetFormComponent implements OnInit, OnDestroy, OnChanges {
   petId?: number;
   errorMessage?: string;
 
-  @Input() petIdInput?: number | null = null; // when used as modal, parent sets this
+  @Input() petIdInput?: number | null = null; 
   @Input() openInModal = false;
   @Output() close = new EventEmitter<boolean>();
 

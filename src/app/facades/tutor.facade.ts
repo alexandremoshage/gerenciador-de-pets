@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
+import { finalize, map } from 'rxjs/operators';
 
 import { TutorService } from '../services/tutor.service';
 import { TutorRequest } from '../models/tutor-request.model';
@@ -15,7 +16,59 @@ import { isValidCpf, normalizeCpf } from '../validators/cpf.validator';
   providedIn: 'root'
 })
 export class TutorFacade {
+  private readonly _tutorsPage = new BehaviorSubject<PagedResponse<TutorResponse> | null>(null);
+  readonly tutorsPage$ = this._tutorsPage.asObservable();
+  readonly tutors$ = this.tutorsPage$.pipe(map((page) => page?.content ?? []));
+  readonly totalPages$ = this.tutorsPage$.pipe(map((page) => page?.pageCount ?? 0));
+  readonly totalElements$ = this.tutorsPage$.pipe(map((page) => page?.total ?? 0));
+
+  private readonly _selectedTutor = new BehaviorSubject<TutorResponse | null>(null);
+  readonly selectedTutor$ = this._selectedTutor.asObservable();
+
+  private readonly _loading = new BehaviorSubject<boolean>(false);
+  readonly loading$ = this._loading.asObservable();
+
+  private readonly _error = new BehaviorSubject<unknown | null>(null);
+  readonly error$ = this._error.asObservable();
+
+  private lastListQuery: { page: number; size: number; nome?: string } = { page: 0, size: 10 };
+
   constructor(private tutorService: TutorService) {}
+
+  loadTutorsPage(page = 0, size = 10, nome?: string): void {
+    this.lastListQuery = { page, size, nome };
+    this._loading.next(true);
+    this._error.next(null);
+
+    this.tutorService
+      .findAll(page, size, nome)
+      .pipe(finalize(() => this._loading.next(false)))
+      .subscribe({
+        next: (body) => this._tutorsPage.next(body),
+        error: (err) => this._error.next(err)
+      });
+  }
+
+  reloadTutorsPage(): void {
+    const q = this.lastListQuery;
+    this.loadTutorsPage(q.page, q.size, q.nome);
+  }
+
+  loadTutorById(id: number): void {
+    this._loading.next(true);
+    this._error.next(null);
+    this.tutorService
+      .findById(id)
+      .pipe(finalize(() => this._loading.next(false)))
+      .subscribe({
+        next: (tutor) => this._selectedTutor.next(tutor),
+        error: (err) => this._error.next(err)
+      });
+  }
+
+  clearSelectedTutor(): void {
+    this._selectedTutor.next(null);
+  }
 
   create(request: TutorRequest): Observable<TutorResponse> {
     const errorMessage = this.validateTutorRequest(request);

@@ -15,11 +15,12 @@
     </div>
   </div>
 
-  <app-loading *ngIf="loading"></app-loading>
+  <app-loading *ngIf="(loading$ | async)"></app-loading>
 
-  <div *ngIf="!loading && tutors.length === 0" class="text-center py-8 text-gray-500">Nenhum tutor cadastrado.</div>
+  <ng-container *ngIf="tutors$ | async as tutors">
+  <div *ngIf="!(loading$ | async) && tutors.length === 0" class="text-center py-8 text-gray-500">Nenhum tutor cadastrado.</div>
 
-  <div *ngIf="!loading && tutors.length > 0" class="overflow-x-auto">
+  <div *ngIf="!(loading$ | async) && tutors.length > 0" class="overflow-x-auto">
     <table class="min-w-full bg-white rounded-md overflow-hidden">
       <thead class="bg-gray-50 text-left">
         <tr>
@@ -47,14 +48,15 @@
 
     <app-pagination
       [currentPage]="currentPage"
-      [totalPages]="totalPages"
+      [totalPages]="(totalPages$ | async) ?? 0"
       [pageSize]="pageSize"
       [pageSizeOptions]="pageSizeOptions"
-      [totalElements]="totalElements"
+      [totalElements]="(totalElements$ | async) ?? 0"
       (pageChange)="goToPage($event)"
       (pageSizeChange)="onPageSizeChange($event)">
     </app-pagination>
   </div>
+  </ng-container>
 
   <div *ngIf="showFormModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal(false)">
     <div #modalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">

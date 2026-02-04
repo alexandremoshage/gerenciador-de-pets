@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -7,10 +7,10 @@ import { LoadingComponent } from '../loading/loading.component';
 import { TutorFormComponent } from '../tutor-create/tutor-form.component';
 import { TutorLinkComponent } from '../tutor-link/tutor-link.component';
 import { TutorFacade } from '../../facades/tutor.facade';
-import { TutorResponse } from '../../models/tutor-response.model';
-import { PagedResponse } from '../../models/paged-response.model';
-import { finalize } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { Location } from '@angular/common';
+import { Observable } from 'rxjs';
+import { TutorResponse } from '../../models/tutor-response.model';
 
 @Component({
   selector: 'app-tutor-list',
@@ -20,12 +20,13 @@ import { Location } from '@angular/common';
   styleUrls: ['./tutor-list.component.scss']
 })
 export class TutorListComponent implements OnInit {
-  tutors: TutorResponse[] = [];
-  loading = false;
+  readonly tutors$: Observable<TutorResponse[]>;
+  readonly loading$: Observable<boolean>;
+  readonly totalPages$: Observable<number>;
+  readonly totalElements$: Observable<number>;
+
   currentPage = 0;
   pageSize = 5;
-  totalPages = 0;
-  totalElements = 0;
   pageSizeOptions = [5, 10, 20, 50];
   nomeFilter = '';
   showFormModal = false;
@@ -34,7 +35,12 @@ export class TutorListComponent implements OnInit {
   selectedLinkTutorId?: number | null = null;
   @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
 
-  constructor(private tutorFacade: TutorFacade, private cdr: ChangeDetectorRef, private location: Location) {}
+  constructor(private tutorFacade: TutorFacade, private location: Location) {
+    this.tutors$ = this.tutorFacade.tutors$;
+    this.loading$ = this.tutorFacade.loading$;
+    this.totalPages$ = this.tutorFacade.tutorsPage$.pipe(map((p) => p?.pageCount ?? 1));
+    this.totalElements$ = this.tutorFacade.tutorsPage$.pipe(map((p) => p?.total ?? 0));
+  }
 
   ngOnInit(): void {
     this.load();
@@ -60,16 +66,7 @@ export class TutorListComponent implements OnInit {
   }
 
   load(): void {
-    this.loading = true;
-    this.tutorFacade.findAll(this.currentPage, this.pageSize, this.nomeFilter || undefined).pipe(finalize(() => (this.loading = false))).subscribe({
-      next: (body: PagedResponse<TutorResponse>) => {
-        this.tutors = body.content ?? [];
-        this.totalPages = body.pageCount ?? 1;
-        this.totalElements = body.total ?? 0;
-        this.cdr.markForCheck();
-      },
-      error: (err) => console.error('Erro ao carregar tutores:', err)
-    });
+    this.tutorFacade.loadTutorsPage(this.currentPage, this.pageSize, this.nomeFilter || undefined);
   }
 
   create(): void {
@@ -103,7 +100,8 @@ export class TutorListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    if (page >= 0 && page < this.totalPages) {
+    // totalPages agora vem do facade; ainda prevenimos páginas negativas.
+    if (page >= 0) {
       this.currentPage = page;
       this.load();
     }
