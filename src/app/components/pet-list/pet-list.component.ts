@@ -22,7 +22,7 @@ export class PetListComponent implements OnInit {
   pets: PetResponse[] = [];
   loading = false;
   currentPage = 0;
-  pageSize = 10;
+  pageSize = 5;
   totalPages = 0;
   totalElements = 0;
   pageSizeOptions = [5, 10, 20, 50];

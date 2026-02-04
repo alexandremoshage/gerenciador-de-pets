@@ -1,17 +1,18 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss']
 })
 export class PaginationComponent {
   @Input() currentPage = 0;
   @Input() totalPages = 0;
-  @Input() pageSize = 10;
+  @Input() pageSize = 5;
   @Input() pageSizeOptions: number[] = [5, 10, 20, 50];
   @Input() totalElements = 0;
 
@@ -30,13 +31,8 @@ export class PaginationComponent {
     if (page >= 0 && page < this.totalPages) this.pageChange.emit(page);
   }
 
-  changePageSize(value: number): void {
+  onPageSizeSelect(value: number): void {
     this.pageSizeChange.emit(value);
-  }
-
-  changePageSizeFromEvent(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value;
-    this.changePageSize(+value);
   }
 
   getPageNumbers(): number[] {
