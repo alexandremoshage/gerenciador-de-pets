@@ -52,7 +52,7 @@ describe('Integração Real com a API (Setup no beforeAll)', () => {
       email: `teste+${unique}@email.com`,
       telefone: '65999999999',
       endereco: 'Rua dos Testes, 0',
-      cpf: Number(String(unique).slice(-11).padStart(11, '1')),
+      cpf: String(unique).slice(-11).padStart(11, '1'),
     };
 
     const tutorResponse = await lastValueFrom(tutorService.create(novoTutor));

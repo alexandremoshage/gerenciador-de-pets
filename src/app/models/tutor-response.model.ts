@@ -7,7 +7,7 @@ export interface TutorResponse {
   email: string;
   telefone: string;
   endereco: string;
-  cpf: number;
+  cpf: string;
   foto?: Anexo;
   pets: PetResponse[];
 }

@@ -3,5 +3,5 @@ export interface TutorRequest {
   email?: string;
   telefone: string;
   endereco?: string;
-  cpf?: number;
+  cpf?: string;
 }
