@@ -5,7 +5,7 @@ import { Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
-import { PetFormComponent } from '../pet-create/pet-form.component';
+import { PetFormComponent } from '../pet-form/pet-form.component';
 import { PetService } from '../../services/pet.service';
 import { PetResponse } from '../../models/pet-response.model';
 import { finalize } from 'rxjs/operators';
