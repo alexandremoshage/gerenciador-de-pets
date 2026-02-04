@@ -6,11 +6,12 @@ import { TutorFacade } from '../../facades/tutor.facade';
 import { TutorResponse } from '../../models/tutor-response.model';
 import { TutorRequest } from '../../models/tutor-request.model';
 import { ValidationError } from '../../validators/validation-error';
+import { MaskDirective } from '../../masks/mask.directive';
 
 @Component({
   selector: 'app-tutor-create',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, MaskDirective],
   templateUrl: './tutor-form.component.html',
   styleUrls: ['./tutor-form.component.scss']
 })

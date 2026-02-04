@@ -1,5 +1,5 @@
 export function normalizeCpf(value?: string | null): string {
-  return (value ?? '').replace(/\D/g, '');
+  return String(value ?? '').replace(/\D/g, '');
 }
 
 export function isValidCpf(value?: string | null): boolean {

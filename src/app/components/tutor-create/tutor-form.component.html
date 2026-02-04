@@ -11,7 +11,7 @@
       <div class="grid grid-cols-2 gap-4">
         <div>
           <label class="block text-sm font-medium text-gray-700">Telefone <span class="text-red-600">*</span></label>
-          <input type="text" [(ngModel)]="telefone" name="telefone" required aria-required="true" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+          <input type="text" [(ngModel)]="telefone" name="telefone" required aria-required="true" appMask="phone" inputmode="numeric" autocomplete="tel" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700">Email</label>
@@ -26,7 +26,7 @@
 
       <div>
         <label class="block text-sm font-medium text-gray-700">CPF</label>
-        <input type="text" [(ngModel)]="cpf" name="cpf" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
+        <input type="text" [(ngModel)]="cpf" name="cpf" appMask="cpf" inputmode="numeric" autocomplete="off" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" />
       </div>
 
       <div>
