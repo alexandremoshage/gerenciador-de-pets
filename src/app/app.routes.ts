@@ -1,29 +1,19 @@
 import { Routes } from '@angular/router';
-import { LoginComponent } from './components/login/login.component';
-import { PetFormComponent } from './components/pet-form/pet-form.component';
-import { PetListComponent } from './components/pet-list/pet-list.component';
-import { authGuard } from './guards/auth.guard';
+import { authMatchGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-	{ path: 'login', component: LoginComponent },
+	{ path: 'login', loadComponent: () => import('./components/login/login.component').then((m) => m.LoginComponent) },
 	{
 		path: 'pets',
-		component: PetListComponent,
-		canActivate: [authGuard],
-		children: [
-			{ path: 'create', component: PetFormComponent, canActivate: [authGuard] },
-			{ path: ':id/details', loadComponent: () => import('./components/pet-details/pet-details.component').then((m) => m.PetDetailsComponent), canActivate: [authGuard] }
-		]
+		canMatch: [authMatchGuard],
+		loadChildren: () => import('./features/pets/pets.routes').then((m) => m.PETS_ROUTES)
 	},
 	{
 		path: 'tutor',
-		loadComponent: () => import('./components/tutor-list/tutor-list.component').then(m => m.TutorListComponent),
-		canActivate: [authGuard],
-		children: [
-			{ path: 'create', loadComponent: () => import('./components/tutor-create/tutor-form.component').then(m => m.TutorFormComponent), canActivate: [authGuard] },
-			{ path: ':id/link', loadComponent: () => import('./components/tutor-link/tutor-link.component').then(m => m.TutorLinkComponent), canActivate: [authGuard] }
-		]
+		canMatch: [authMatchGuard],
+		loadChildren: () => import('./features/tutor/tutor.routes').then((m) => m.TUTOR_ROUTES)
 	},
 
 	{ path: '', redirectTo: 'pets', pathMatch: 'full' },
+	{ path: '**', redirectTo: 'pets' }
 ];
