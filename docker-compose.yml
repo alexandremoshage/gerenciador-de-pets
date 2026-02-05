@@ -1,0 +1,30 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+      args:
+        APP_NAME: gerenciador-de-pets
+        NODE_IMAGE: ${NODE_IMAGE:-node}
+        NODE_VERSION: ${NODE_VERSION:-20}
+        NGINX_IMAGE: ${NGINX_IMAGE:-nginx}
+        NGINX_VERSION: ${NGINX_VERSION:-1.27}
+    ports:
+      - "8080:80"
+
+  web-dev:
+    profiles: ["dev"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+      args:
+        APP_NAME: gerenciador-de-pets
+        NODE_IMAGE: ${NODE_IMAGE:-node}
+        NODE_VERSION: ${NODE_VERSION:-20}
+    ports:
+      - "4200:4200"
+    volumes:
+      - .:/app
+      - /app/node_modules

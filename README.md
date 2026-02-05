@@ -1,59 +1,142 @@
-# GerenciadorDePets
+# Gerenciador de Pets
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.0.
+Aplicação web em Angular para gerenciamento de **Pets** e **Tutores**, com autenticação e integração com uma API REST.
 
-## Development server
+## O que foi feito neste projeto
 
-To start a local development server, run:
+- Tela de **login** e fluxo de autenticação (token + refresh).
+- CRUD de **Pets** (listar, criar, editar, remover) e suporte a **upload de foto**.
+- CRUD de **Tutores** (listar, criar, editar, remover) e suporte a **upload de foto**.
+- **Vínculo/Desvínculo** de Pets em Tutores.
+- Componentes utilitários (ex.: paginação, loading, sidebar) e validações/máscaras.
 
-```bash
-ng serve
-```
+## Tecnologias utilizadas
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- **Angular 21** (standalone) + **TypeScript**
+- **RxJS**
+- **SCSS**
+- **Tailwind CSS**
+- **ngx-mask** (máscaras)
+- Testes com `ng test` (specs em `*.spec.ts`)
+- **Docker** (multi-stage) + **Docker Compose**
+- **Nginx** para servir o build de produção
 
-## Code scaffolding
+## Pré-requisitos
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Para rodar fora do Docker:
 
-```bash
-ng generate component component-name
-```
+- **Node.js 20+**
+- **npm** (o projeto usa `npm`)
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Para rodar com Docker:
 
-```bash
-ng generate --help
-```
+- **Docker Desktop** (Windows/macOS/Linux)
 
-## Building
+## Configuração da API
 
-To build the project run:
+Por padrão, o front consome a API configurada em:
 
-```bash
-ng build
-```
+- `src/app/environments/environment.ts` → `apiUrl`
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Se você tiver uma API local, troque o `apiUrl` para o seu endereço.
 
-## Running unit tests
+## Como rodar fora do Docker (Node + Angular CLI)
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+Instalar dependências:
 
 ```bash
-ng e2e
+npm ci
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+Subir o servidor de desenvolvimento:
 
-## Additional Resources
+```bash
+npm start
+```
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Acesso no navegador:
+
+- `http://localhost:4200/`
+
+Build de produção (gera o `dist/`):
+
+```bash
+npm run build
+```
+
+## Como rodar os testes unitários
+
+O projeto separa testes unitários e de integração por nome de arquivo:
+
+- Unitários: `src/**/*.spec.ts`
+- Integração: `src/**/*.integration.spec.ts`
+
+Para rodar **somente os unitários**:
+
+```bash
+npm test
+```
+
+## Como rodar os testes de integração
+
+Os testes de integração ficam em `src/**/*.integration.spec.ts` e fazem chamadas reais para a API (ex.: login, criação/edição/vínculo).
+
+Rodar:
+
+```bash
+npm run test:integration
+```
+
+Observações importantes:
+
+- A API precisa estar **acessível** conforme o `apiUrl` do `environment.ts`.
+
+## Como rodar a aplicação pelo Docker
+
+### Produção (Nginx) via Docker Compose
+
+Subir e fazer build:
+
+```bash
+docker compose up --build
+```
+
+Acesso no navegador:
+
+- `http://localhost:8080/`
+
+### Desenvolvimento (Angular dev server) via Docker Compose
+
+Subir com o profile `dev`:
+
+```bash
+docker compose --profile dev up --build
+```
+
+Acesso no navegador:
+
+- `http://localhost:4200/`
+
+### Se o pull do Docker Hub falhar na sua rede
+
+Algumas redes bloqueiam o host de download de camadas do Docker Hub (Cloudflare R2), causando erros durante `docker build` / `docker pull`.
+
+Workaround: usar as imagens oficiais espelhadas no **AWS ECR Public**.
+
+PowerShell (Compose):
+
+```powershell
+$env:NODE_IMAGE  = 'public.ecr.aws/docker/library/node'
+$env:NGINX_IMAGE = 'public.ecr.aws/docker/library/nginx'
+docker compose up --build
+```
+
+Ou no `docker build`:
+
+```bash
+docker build -t gerenciador-de-pets:prod \
+	--build-arg APP_NAME=gerenciador-de-pets \
+	--build-arg NODE_IMAGE=public.ecr.aws/docker/library/node \
+	--build-arg NGINX_IMAGE=public.ecr.aws/docker/library/nginx \
+	.
+```
