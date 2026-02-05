@@ -1,0 +1,77 @@
+<div class="max-w-3xl w-full">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold">Detalhes do Pet</h3>
+    <button (click)="dismiss()" class="text-sm text-gray-600 hover:underline">Fechar</button>
+  </div>
+
+  <app-loading *ngIf="(loading$ | async)"></app-loading>
+
+  <ng-container *ngIf="pet$ | async as pet">
+    <div *ngIf="!pet || (currentPetId != null && pet.id !== currentPetId)" class="text-gray-600">Carregando detalhes...</div>
+
+    <div *ngIf="pet && (currentPetId == null || pet.id === currentPetId)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="bg-white rounded border border-gray-200 p-4">
+        <h4 class="font-semibold mb-3">Pet</h4>
+
+        <div class="flex gap-4 items-start">
+          <div class="w-24 h-24 rounded border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center">
+            <img *ngIf="pet.foto?.url" [src]="pet.foto?.url" alt="Foto do pet" class="w-full h-full object-cover" />
+            <span *ngIf="!pet.foto?.url" class="text-xs text-gray-500">Sem foto</span>
+          </div>
+
+          <div class="flex-1">
+            <div class="text-sm text-gray-600">ID</div>
+            <div class="font-medium mb-2">{{ pet.id }}</div>
+
+            <div class="text-sm text-gray-600">Nome</div>
+            <div class="font-medium mb-2">{{ pet.nome || '-' }}</div>
+
+            <div class="text-sm text-gray-600">Raça</div>
+            <div class="font-medium mb-2">{{ pet.raca || '-' }}</div>
+
+            <div class="text-sm text-gray-600">Idade</div>
+            <div class="font-medium">{{ pet.idade != null ? pet.idade : '-' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded border border-gray-200 p-4">
+        <h4 class="font-semibold mb-3">Tutor</h4>
+
+        <ng-container *ngIf="tutor$ | async as tutor; else noTutor">
+          <div class="text-sm text-gray-600">Nome</div>
+          <div class="font-medium mb-2">{{ tutor.nome || '-' }}</div>
+
+          <div class="text-sm text-gray-600">Telefone</div>
+          <div class="font-medium mb-2">{{ formatPhone(tutor.telefone) || '-' }}</div>
+
+          <div class="text-sm text-gray-600">CPF</div>
+          <div class="font-medium mb-2">{{ formatCpf(tutor.cpf) || '-' }}</div>
+
+          <div class="text-sm text-gray-600">Email</div>
+          <div class="font-medium mb-2">{{ tutor.email || '-' }}</div>
+
+          <div class="text-sm text-gray-600">Endereço</div>
+          <div class="font-medium">{{ tutor.endereco || '-' }}</div>
+        </ng-container>
+
+        <ng-template #noTutor>
+          <div class="text-sm text-gray-600">Nome</div>
+          <div class="font-medium mb-2">Pet sem tutor</div>
+
+          <div class="text-sm text-gray-600">Telefone</div>
+          <div class="font-medium mb-2">-</div>
+
+          <div class="text-sm text-gray-600">CPF</div>
+          <div class="font-medium mb-2">-</div>
+
+          <div class="text-sm text-gray-600">Email</div>
+          <div class="font-medium mb-2">-</div>
+
+          <div class="text-sm text-gray-600">Endereço</div>
+          <div class="font-medium">-</div>
+        </ng-template>
+      </div>
+    </div>
+  </ng-container>
+</div>

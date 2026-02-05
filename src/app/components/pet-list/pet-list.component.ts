@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { PaginationComponent } from '../pagination/pagination.component';
 import { LoadingComponent } from '../loading/loading.component';
 import { PetFormComponent } from '../pet-form/pet-form.component';
+import { PetDetailsComponent } from '../pet-details/pet-details.component';
 import { PetFacade } from '../../facades/pet.facade';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -14,7 +15,7 @@ import { PetResponse } from '../../models/pet-response.model';
 @Component({
   selector: 'app-pet-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent, PetFormComponent],
+  imports: [CommonModule, RouterModule, FormsModule, PaginationComponent, LoadingComponent, PetFormComponent, PetDetailsComponent],
   templateUrl: './pet-list.component.html',
   styleUrls: ['./pet-list.component.scss']
 })
@@ -31,7 +32,10 @@ export class PetListComponent implements OnInit {
   racaFilter = '';
   showFormModal = false;
   selectedPetId?: number | null = null;
+  showDetailsModal = false;
+  selectedDetailsPetId?: number | null = null;
   @ViewChild('modalDiv') modalDiv?: ElementRef<HTMLDivElement>;
+  @ViewChild('detailsModalDiv') detailsModalDiv?: ElementRef<HTMLDivElement>;
 
   constructor(private petFacade: PetFacade, private route: ActivatedRoute, private location: Location) {
     this.pets$ = this.petFacade.pets$;
@@ -48,6 +52,16 @@ export class PetListComponent implements OnInit {
       this.selectedPetId = qp['id'] ? +qp['id'] : null;
       this.showFormModal = true;
       setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
+    } else if (path && path.indexOf('/pets/') !== -1 && path.indexOf('/details') !== -1) {
+      const parts = path.split('/');
+      const petsIdx = parts.indexOf('pets');
+      const idPart = parts[petsIdx + 1];
+      const id = idPart ? +idPart : null;
+      if (id) {
+        this.selectedDetailsPetId = id;
+        this.showDetailsModal = true;
+        setTimeout(() => this.detailsModalDiv?.nativeElement.focus(), 0);
+      }
     }
   }
 
@@ -106,9 +120,19 @@ export class PetListComponent implements OnInit {
     setTimeout(() => this.modalDiv?.nativeElement.focus(), 0);
   }
 
+  details(id: number): void {
+    this.selectedDetailsPetId = id;
+    this.location.go(`/pets/${id}/details`);
+    this.showDetailsModal = true;
+    setTimeout(() => this.detailsModalDiv?.nativeElement.focus(), 0);
+  }
+
   closeModal(saved?: boolean): void {
     this.showFormModal = false;
+    this.showDetailsModal = false;
     this.selectedPetId = null;
+    this.selectedDetailsPetId = null;
+    this.petFacade.clearSelectedPet();
     this.location.replaceState('/pets');
     if (saved) {
       this.load();

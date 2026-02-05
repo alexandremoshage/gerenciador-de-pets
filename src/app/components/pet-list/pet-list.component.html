@@ -6,6 +6,13 @@
       </div>
     </div>
   </div>
+  <div *ngIf="showDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal(false)">
+    <div #detailsModalDiv tabindex="0" class="max-w-3xl w-full mx-4" (click)="$event.stopPropagation()" (keydown.escape)="closeModal(false)">
+      <div class="bg-white rounded p-4">
+        <app-pet-details-modal [petId]="selectedDetailsPetId" [openInModal]="true" (close)="closeModal($event)"></app-pet-details-modal>
+      </div>
+    </div>
+  </div>
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-semibold">Pets</h1>
     <button (click)="create()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Cadastrar Pet</button>
@@ -48,6 +55,12 @@
           <td class="px-4 py-3">{{ pet.idade != null ? pet.idade : '-' }}</td>
           <td class="px-4 py-3">
             <div class="flex gap-2">
+              <button (click)="details(pet.id)" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50" title="Detalhes">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+                  <circle cx="11" cy="11" r="7"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
               <button (click)="edit(pet.id)" class="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600">Editar</button>
               <button (click)="remove(pet.id)" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Excluir</button>
             </div>

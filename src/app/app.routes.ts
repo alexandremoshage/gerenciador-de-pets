@@ -11,7 +11,8 @@ export const routes: Routes = [
 		component: PetListComponent,
 		canActivate: [authGuard],
 		children: [
-			{ path: 'create', component: PetFormComponent, canActivate: [authGuard] }
+			{ path: 'create', component: PetFormComponent, canActivate: [authGuard] },
+			{ path: ':id/details', loadComponent: () => import('./components/pet-details/pet-details.component').then((m) => m.PetDetailsComponent), canActivate: [authGuard] }
 		]
 	},
 	{

@@ -54,7 +54,6 @@ export class MaskDirective implements ControlValueAccessor {
     try {
       input.setSelectionRange(nextPos, nextPos);
     } catch {
-      // Some input types do not support selection ranges.
     }
 
     this.onChange(masked);

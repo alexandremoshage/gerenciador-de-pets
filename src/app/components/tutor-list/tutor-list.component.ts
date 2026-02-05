@@ -100,7 +100,6 @@ export class TutorListComponent implements OnInit {
   }
 
   goToPage(page: number): void {
-    // totalPages agora vem do facade; ainda prevenimos páginas negativas.
     if (page >= 0) {
       this.currentPage = page;
       this.load();
